@@ -3,9 +3,7 @@ const app = express()
 const cors = require('cors')
 const bodyParser = require('body-parser')
 
-
 require('dotenv').config()
-
 
 app.use(cors())
 app.use(bodyParser.urlencoded({extended: false}))
@@ -16,9 +14,9 @@ app.get('/', (req, res) => {
 });
 
 let user = [];
-let exercise = [];
 let final = [];
 
+//SHOW ALL USER
 app.get('/api/exercise/users', (req,res) => {
   let showUser = [];
   for(let i=0;i<user.length;i++){
@@ -30,6 +28,7 @@ app.get('/api/exercise/users', (req,res) => {
   res.json(showUser);
 });
 
+//SHOW USER EXERCISE LOG
 app.get('/api/exercise/log',(req,res)=>{
   let id = req.query.userId;
   let fromDate = req.query.from;
@@ -72,6 +71,7 @@ app.get('/api/exercise/log',(req,res)=>{
   }
 });
 
+//ADD NEW USER
 app.post('/api/exercise/new-user',(req,res)=>{
   let username = req.body.username;
   
@@ -89,6 +89,7 @@ app.post('/api/exercise/new-user',(req,res)=>{
   })
 });
 
+//ADD EXERCISE TO USER
 app.post('/api/exercise/add', (req,res) => {
   let userId = req.body.userId;
   let description = req.body.description;
@@ -124,25 +125,22 @@ app.post('/api/exercise/add', (req,res) => {
     var [day,month,dateN,year] = n.split(' ',4);
   }
 
-  let finalUser = final.find(x => x._id == userId);
+    let finalUser = final.find(x => x._id == userId);
+    finalUser.count = finalUser.count + 1;
+    finalUser.log.push({
+      description: description,
+          duration : duration,
+          date : day+' '+month+' '+dateN+' '+year
+    })
+    final = [finalUser,...final];
 
-  finalUser.count = finalUser.count + 1;
-
-  finalUser.log.push({
-    description: description,
-        duration : duration,
-        date : day+' '+month+' '+dateN+' '+year
-  })
-
-  final = [finalUser,...final];
-
-  res.json({
-    _id : parseInt(userId),
-    username: user[userId],
-    date : day+' '+month+' '+dateN+' '+year,    
-    duration : parseInt(duration),
-    description: description,
-  })
+    res.json({
+      _id : parseInt(userId),
+      username: user[userId],
+      date : day+' '+month+' '+dateN+' '+year,    
+      duration : parseInt(duration),
+      description: description,
+    })
 });
 
 const listener = app.listen(process.env.PORT || 3000, () => {
